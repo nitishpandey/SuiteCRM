@@ -229,6 +229,48 @@ function getEditFieldHTML($module, $fieldname, $aow_field, $view = 'EditView', $
 
             $value = str_ireplace($fieldname, $aow_field, $value);
         }
+         else {
+            
+            try {
+                if (isset($fieldlist[$fieldname]['function']))
+                {
+                    if (is_array($fieldlist[$fieldname]['function']) && isset($fieldlist[$fieldname]['function']['name'])) {
+                        $function = $fieldlist[$fieldname]['function']['name'];
+                    } else {
+                        $function = $fieldlist[$fieldname]['function'];
+                    }
+                    
+                    if (isset($fieldlist[$fieldname]['function']['include']) &&
+                            file_exists($fieldlist[$fieldname]['function']['include'])
+                            ) {
+                                require_once($fieldlist[$fieldname]['function']['include']);
+                                $fieldlist[$fieldname]['options'] = call_user_func(
+                                        $function,
+                                        $focus,
+                                        $fieldname,
+                                        $value,
+                                        $view
+                                        );
+                            }
+                            else {
+                                $fieldlist[$fieldname]['options'] = call_user_func(
+                                        $function,
+                                        $focus,
+                                        $fieldname,
+                                        $value,
+                                        $view
+                                        );
+                            }
+                            
+                }
+                
+            }
+            catch (Exception $e){
+                $fieldlist[$fieldname]['options'] = [];
+            }
+            
+        }
+    
     }
 
     if ($fieldlist[$fieldname]['type'] == 'link') {
